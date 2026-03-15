@@ -53,7 +53,7 @@ class Apuesta extends Model
     // Verificar si el usuario puede cobrar
     public function esCobrable(): bool
     {
-        return $this->estado === self::ESTADO_GANADA && 
+        return $this->estado == self::ESTADO_GANADA && 
                $this->evento->finalizado();
     }
 }
