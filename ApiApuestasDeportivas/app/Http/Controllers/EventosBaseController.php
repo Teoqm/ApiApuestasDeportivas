@@ -11,98 +11,124 @@ class EventosBaseController extends BaseController
 {
     public function index(){
 
-        $productos = Evento::all();
+        $eventos = Evento::all();
 
          return response()->json([
-            'message'=> 'Listado de todos los productos',
-            'data'=> $productos,]);
+            'message'=> 'Listado de todos los Eventos',
+            'data'=> $$eventos,]);
     }
 
     public function store(Request $request){
 
+        //se valida si al  inofrmacion si es aceptable
         $validador = Validator::make($request->all(), [
+            'deporte' => 'nullable|string|max:10',
             'nombre' => 'required|string|max:100',
-            'precio' => 'required|numeric|min:0',
-            'stock' => 'nullable|integer|min:0',
-            'descripcion' => 'nullable|string'
+            'eq_visante' => 'required|string|max:20',
+            'eq_local' => 'required|string|max:20',
+            'fecha' => 'required|string|max:20',
+            'apuesta' => 'required|string|max:20',
+            'monton' => 'required|integer|min:0',
+            'couta' => 'required|integer|min:'
         ]);
         if($validador->fails()){
             return response()->json([
                 'errors' => $validador->errors()
             ],422);
         }
-
-        $productos = Producto::create([
+        // s ecrea un nuevo envento
+        $eventos = Evento::create([
             'nombre' => $request->input('nombre'),
-            'precio' => $request->input('precio'),
+            'eq_visante' => $request->input('eq_visante'),
+            'eq_local' => $request->input('eq_local' ),
+            'fecha' => $request->input('fecha'),
+            'apuesta' => $request->input('apuesta'),
+            'monton' => $request->input('monton'),
+            'couta' => $request->input('couta')
+
+
+
+
         ]);
 
         return response()->json([
-            'message' => 'Producto creado correctamente',
-            'data'=> $productos,], 201);
+            'message' => 'Evento creado correctamente',
+            'data'=> $eventos,], 201);
     }
 
     public function show(String $id){
 
-        $producto = Producto::find($id);
+        $evento = Evento::find($id);
 
-        if(!$producto){
+        if(!$evento){
             return response()->json([
-            'message' => "No se encontro el producto solicitado con id ($id)"], 404);
+            'message' => "No se encontro el evento solicitado con id ($id)"], 404);
         }
 
         return response()->json([
-            'message' => "Producto encontrado con id ($id)",
-            'data'=> $producto]);
+            'message' => "evento encontrado con id ($id)",
+            'data'=> $evento]);
     }
 
     public function update(Request $request, String $id){
 
-        $producto = Producto::find($id);
+        $evento = Evento::find($id);
 
-         if(!$producto){
+        if(!$evento){
             return response()->json([
-            'message' => "No se encontro el producto solicitado con id ($id)"], 404);
+            'message' => "No se encontro el evento solicitado con id ($id)"], 404);
         }
 
-        $validador = Validator::make($request->all(),[
+        //se valida si al  inofrmacion si es aceptable
+        $validador = Validator::make($request->all(), [
+            'deporte' => 'nullable|string|max:10',
             'nombre' => 'nullable|string|max:100',
-            'precio' => 'nullable|numeric|min:0',
-            'stock' => 'nullable|integer|min:0',
-            'descripcion' => 'nullable|string'
+            'eq_visante' => 'nullable|string|max:20',
+            'eq_local' => 'nullable|string|max:20',
+            'fecha' => 'nullable|string|max:20',
+            'apuesta' => 'nullable|string|max:20',
+            'monton' => 'nullable|integer|min:0',
+            'couta' => 'nullable|integer|min:'
         ]);
-
         if($validador->fails()){
             return response()->json([
                 'errors' => $validador->errors()
             ],422);
         }
 
-        $producto->update([
-            'nombre' => $request->input('nombre', $producto->nombre),
-            'precio' => $request->input('precio', $producto->precio),
+        $evento->update([
+
+            'deporte' => $request->input('deporte', $evento->deporte),
+            'nombre' => $request->input('nombre', $evento->nombre),
+            'eq_visante' => $request->input('eq_visante', $evento->eq_visante),
+            'eq_local' => $request->input('eq_local', $evento->eq_local),
+            'fecha' => $request->input('fecha', $evento->fecha),
+            'apuesta' => $request->input('apuesta', $evento->apuesta),
+            'monton' => $request->input('monton', $evento->monton),
+            'couta' => $request->input('couta', $evento->monton),
         ]);
 
         return response()->json([
-            'message' => "Producto con id ($id) actualizado correctamente",
-            'data'=> $producto]);
+            'message' => "Evento con id ($id) actualizado correctamente",
+            'data'=> $evento]);
     }
 
     public function destroy(String $id){
 
-        $producto = Producto::find($id);
+        $evento = Evento::find($id);
 
-         if(!$producto){
+         if(!$evento){
             return response()->json([
-            'message' => "No se encontro el producto solicitado con id ($id)"], 404);
+            'message' => "No se encontro el evento solicitado con id ($id)"], 404);
         }
 
         $producto->delete();
 
         return response()->json([
-            'message' => "Producto con id ($id) ha sido eliminado"]);
+            'message' => "evento con id ($id) ha sido eliminado"]);
     }
 
 
+    
 
 }

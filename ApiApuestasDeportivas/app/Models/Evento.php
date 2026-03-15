@@ -12,23 +12,13 @@ class Evento extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    const APUESTA_VISTANTE = 'Vistante Gana';
-    const APUESTA_LOCAL = 'Locala Gana';
-    const APUESTA_EMPATE = 'usuario';
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'id',
         'deporte',
-        'eq_visantete',
-        'eq_local',
-        'fecha',
-        'apuesta',
-        'monton',
-        'couto'
+        'nombre',
+        'equipo_visante',
+        'equipo_local',
+        'fecha'
     ];
 
     
