@@ -28,20 +28,20 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('me', [AuthController::class, 'me'])->middleware('role:admin,usuario');
 
     //ver eventos
-    Route::get('eventos', [ProductoBaseController::class, 'show'])->middleware('role:admin,usuario');
+    Route::get('eventos', [EventosBaseController::class, 'show'])->middleware('role:admin,usuario');
     //ver evento especifico
-    Route::get('eventos/{id}', [ProductoBaseController::class, 'show'])->middleware('role:admin,usuario');
+    Route::get('eventos/{id}', [EventosBaseController::class, 'show'])->middleware('role:admin,usuario');
     
     
     // ===== RUTAS De Admin =====
     //  Rutas accesibles para admin
     Route::middleware([\App\Http\Middleware\CheckRole::class . ':admin'])->group(function () {
         //crea eventos
-        Route::post('eventos', [ProductoBaseController::class, 'store']) ->middleware('role:admin');
+        Route::post('eventos', [EventosBaseController::class, 'store']) ->middleware('role:admin');
         //modificar eventos
-        Route::put('eventos/{id}', [ProductoBaseController::class, 'update']) ->middleware('role:admin');
+        Route::put('eventos/{id}', [EventosBaseController::class, 'update']) ->middleware('role:admin');
         //eleminar evemtos
-        Route::delete('eventos/{id}', [ProductoBaseController::class, 'destroy']) ->middleware('role:admin');
+        Route::delete('eventos/{id}', [EventosBaseController::class, 'destroy']) ->middleware('role:admin');
     });
     
 });middleware('auth:sanctum');
