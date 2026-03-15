@@ -9,126 +9,164 @@ use Illuminate\Support\Facades\Validator;
 
 class EventosBaseController extends BaseController
 {
-    public function index(){
-
+    // Listar todos los eventos
+    public function index()
+    {
         $eventos = Evento::all();
 
-         return response()->json([
-            'message'=> 'Listado de todos los Eventos',
-            'data'=> $$eventos,]);
+        return response()->json([
+            'message' => 'Listado de todos los Eventos',
+            'data' => $eventos,  
+        ]);
     }
 
-    public function store(Request $request){
-
-        //se valida si al  inofrmacion si es aceptable
-        $validador = Validator::make($request->all(), [
-            'deporte' => 'nullable|string|max:10',
-            'nombre' => 'required|string|max:100',
-            'eq_visante' => 'required|string|max:20',
-            'eq_local' => 'required|string|max:20',
-            'fecha' => 'required|string|max:20',
-            'apuesta' => 'required|string|max:20',
-            'monton' => 'required|integer|min:0',
-            'couta' => 'required|integer|min:'
+    //Crear un nuevo evento solo admin
+    public function store(Request $request)
+    {
+        // Validar según los campos del MODELO
+        $validator = Validator::make($request->all(), [
+            'deporte' => 'required|string|max:50',
+            'equipo_local' => 'required|string|max:100',      
+            'equipo_visitante' => 'required|string|max:100',  
+            'fecha' => 'required|date',                        
+            'estado' => 'sometimes|in:pendiente,finalizado', 
         ]);
-        if($validador->fails()){
+
+        if ($validator->fails()) {
             return response()->json([
-                'errors' => $validador->errors()
-            ],422);
+                'message' => 'Error de validación',
+                'errors' => $validator->errors()
+            ], 422);
         }
-        // s ecrea un nuevo envento
-        $eventos = Evento::create([
-            'nombre' => $request->input('nombre'),
-            'eq_visante' => $request->input('eq_visante'),
-            'eq_local' => $request->input('eq_local' ),
-            'fecha' => $request->input('fecha'),
-            'apuesta' => $request->input('apuesta'),
-            'monton' => $request->input('monton'),
-            'couta' => $request->input('couta')
 
-
-
-
+        // Crear evento con los campos correctos
+        $evento = Evento::create([
+            'deporte' => $request->deporte,
+            'equipo_local' => $request->equipo_local,
+            'equipo_visitante' => $request->equipo_visitante,
+            'fecha' => $request->fecha,
+            'estado' => $request->estado ?? Evento::ESTADO_PENDIENTE, // valor por defecto pendiente
         ]);
 
         return response()->json([
             'message' => 'Evento creado correctamente',
-            'data'=> $eventos,], 201);
+            'data' => $evento,
+        ], 201);
     }
 
-    public function show(String $id){
+    //Mostrar un evento específico
 
+    public function show(String $id)
+    {
         $evento = Evento::find($id);
 
-        if(!$evento){
+        if (!$evento) {
             return response()->json([
-            'message' => "No se encontro el evento solicitado con id ($id)"], 404);
+                'message' => "No se encontró el evento solicitado con id ($id)"
+            ], 404);
         }
 
         return response()->json([
-            'message' => "evento encontrado con id ($id)",
-            'data'=> $evento]);
+            'message' => "Evento encontrado con id ($id)",
+            'data' => $evento
+        ]);
     }
 
-    public function update(Request $request, String $id){
+    //Actualizar un evento solo admin
 
+    public function update(Request $request, String $id)
+    {
         $evento = Evento::find($id);
 
-        if(!$evento){
+        if (!$evento) {
             return response()->json([
-            'message' => "No se encontro el evento solicitado con id ($id)"], 404);
+                'message' => "No se encontró el evento solicitado con id ($id)"
+            ], 404);
         }
 
-        //se valida si al  inofrmacion si es aceptable
-        $validador = Validator::make($request->all(), [
-            'deporte' => 'nullable|string|max:10',
-            'nombre' => 'nullable|string|max:100',
-            'eq_visante' => 'nullable|string|max:20',
-            'eq_local' => 'nullable|string|max:20',
-            'fecha' => 'nullable|string|max:20',
-            'apuesta' => 'nullable|string|max:20',
-            'monton' => 'nullable|integer|min:0',
-            'couta' => 'nullable|integer|min:'
+        // Validar según los campos 
+        $validator = Validator::make($request->all(), [
+            'deporte' => 'sometimes|string|max:50',
+            'equipo_local' => 'sometimes|string|max:100',
+            'equipo_visitante' => 'sometimes|string|max:100',
+            'fecha' => 'sometimes|date',
+            'estado' => 'sometimes|in:pendiente,finalizado',
+            'resultado' => 'sometimes|in:local,empate,visitante', // para simular resultado
         ]);
-        if($validador->fails()){
+
+        if ($validator->fails()) {
             return response()->json([
-                'errors' => $validador->errors()
-            ],422);
+                'message' => 'Error de validación',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        $evento->update([
-
-            'deporte' => $request->input('deporte', $evento->deporte),
-            'nombre' => $request->input('nombre', $evento->nombre),
-            'eq_visante' => $request->input('eq_visante', $evento->eq_visante),
-            'eq_local' => $request->input('eq_local', $evento->eq_local),
-            'fecha' => $request->input('fecha', $evento->fecha),
-            'apuesta' => $request->input('apuesta', $evento->apuesta),
-            'monton' => $request->input('monton', $evento->monton),
-            'couta' => $request->input('couta', $evento->monton),
-        ]);
+        // Actualizar solo los campos que vienen en la petición
+        $evento->update($request->only([
+            'deporte',
+            'equipo_local',
+            'equipo_visitante',
+            'fecha',
+            'estado',
+            'resultado'
+        ]));
 
         return response()->json([
             'message' => "Evento con id ($id) actualizado correctamente",
-            'data'=> $evento]);
+            'data' => $evento
+        ]);
     }
 
-    public function destroy(String $id){
-
+    // Eliminar un evento solo admin
+    public function destroy(String $id)
+    {
         $evento = Evento::find($id);
 
-         if(!$evento){
+        if (!$evento) {
             return response()->json([
-            'message' => "No se encontro el evento solicitado con id ($id)"], 404);
+                'message' => "No se encontró el evento solicitado con id ($id)"
+            ], 404);
         }
-
-        $producto->delete();
+        $evento->delete();
 
         return response()->json([
-            'message' => "evento con id ($id) ha sido eliminado"]);
+            'message' => "Evento con id ($id) ha sido eliminado"
+        ]);
     }
 
-
+    //Simular resultado de un evento (método extra útil para el admin)
     
+    public function simularResultado(Request $request, String $id)
+    {
+        $evento = Evento::find($id);
 
+        if (!$evento) {
+            return response()->json([
+                'message' => "No se encontró el evento solicitado con id ($id)"
+            ], 404);
+        }
+
+        // Validar resultado
+        $validator = Validator::make($request->all(), [
+            'resultado' => 'required|in:local,empate,visitante',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Actualizar evento con resultado y estado finalizado
+        $evento->update([
+            'resultado' => $request->resultado,
+            'estado' => Evento::ESTADO_FINALIZADO
+        ]);
+
+        return response()->json([
+            'message' => "Resultado del evento ($id) simulado correctamente",
+            'data' => $evento
+        ]);
+    }
 }
