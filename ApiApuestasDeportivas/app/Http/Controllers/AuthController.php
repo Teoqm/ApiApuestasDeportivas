@@ -173,6 +173,7 @@ class AuthController extends Controller
     }
 
     //Genera un código aleatorio de 6 dígitos
+
     public function makeCode()
     {
         // Genera bytes aleatorios y los convierte a hexadecimal
