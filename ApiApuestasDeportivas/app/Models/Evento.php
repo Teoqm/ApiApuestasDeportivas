@@ -3,23 +3,39 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Model;  
 
-class Evento extends Authenticatable implements JWTSubject
+class Evento extends Model  
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory;
+
+    // Estados del evento
+    const ESTADO_PENDIENTE = 'pendiente';
+    const ESTADO_FINALIZADO = 'finalizado';
 
     protected $fillable = [
-        'id',
+
         'deporte',
-        'nombre',
-        'equipo_visante',
-        'equipo_local',
-        'fecha'
+        'equipo_local',      
+        'equipo_visitante',  
+        'fecha',
+        'estado',
+        'resultado'  // local, empate, visitante (cuando finaliza)            
     ];
 
-    
+    protected $casts = [
+        'fecha' => 'datetime',
+    ];
+
+    // Relación: Un evento tiene muchas apuestas
+    public function apuestas()
+    {
+        return $this->hasMany(Apuesta::class);
+    }
+
+    // Verificar si el evento ya finalizó
+    public function finalizado(): bool
+    {
+        return $this->estado == self::ESTADO_FINALIZADO;
+    }
 }

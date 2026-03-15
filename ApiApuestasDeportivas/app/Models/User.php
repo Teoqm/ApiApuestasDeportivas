@@ -15,49 +15,44 @@ class User extends Authenticatable implements JWTSubject
     const ROLE_ADMIN = 'admin';
     const ROLE_USUARIO = 'usuario';
 
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
+        'saldo',
         'codigo_verificacion',
-        'saldo'
+        'codigo_expiracion'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'codigo_expiracion' => 'datetime',
     ];
 
-    public function getJWTIdentifier(){
+    public function getJWTIdentifier()
+    {
         return $this->getKey();
     }
 
-    public function getJWTCustomClaims(){
+    public function getJWTCustomClaims()
+    {
         return ['role' => $this->role];
     }
 
-    public function isAdmin(): bool{
+    public function isAdmin(): bool
+    {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    // Relación: Un usuario tiene muchas apuestas
+    public function apuestas()
+    {
+        return $this->hasMany(Apuesta::class);
     }
 }
