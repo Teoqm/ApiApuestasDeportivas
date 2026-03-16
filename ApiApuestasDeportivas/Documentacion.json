@@ -1,0 +1,284 @@
+{
+  "info": {
+    "name": "Api Apuestas Deportivas",
+    "description": "Colección completa para pruebas de API de Apuestas Deportivas",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 Autenticación",
+      "item": [
+        {
+          "name": "Login (Paso 1 - Obtener código)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@api.com\",\n    \"password\": \"password\"\n}"
+            },
+            "description": "Envía credenciales y recibe código OTP por email"
+          }
+        },
+        {
+          "name": "Verify OTP (Paso 2 - Obtener token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/verify-otp",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@api.com\",\n    \"codigo\": \"123456\"\n}"
+            },
+            "description": "Verifica código OTP y obtiene token JWT"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/logout",
+            "description": "Cierra sesión e invalida el token"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/refresh",
+            "description": "Refresca token expirado"
+          }
+        },
+        {
+          "name": "Mi Perfil (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/me",
+            "description": "Obtiene información del usuario autenticado"
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚽ Eventos",
+      "item": [
+        {
+          "name": "Listar Eventos (todos)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/eventos",
+            "description": "Lista todos los eventos disponibles"
+          }
+        },
+        {
+          "name": "Ver Evento por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/eventos/1",
+            "description": "Obtiene detalle de un evento específico"
+          }
+        },
+        {
+          "name": "Crear Evento (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/eventos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"deporte\": \"Fútbol\",\n    \"equipo_local\": \"Real Madrid\",\n    \"equipo_visitante\": \"Barcelona\",\n    \"fecha\": \"2026-06-10 20:00:00\"\n}"
+            },
+            "description": "Crea un nuevo evento (solo admin)"
+          }
+        },
+        {
+          "name": "Actualizar Evento (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/eventos/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fecha\": \"2026-06-15 18:00:00\"\n}"
+            },
+            "description": "Actualiza datos de un evento (solo admin)"
+          }
+        },
+        {
+          "name": "Simular Resultado (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/eventos/1/simular",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"resultado\": \"local\"\n}"
+            },
+            "description": "Simula resultado y actualiza apuestas (solo admin)"
+          }
+        },
+        {
+          "name": "Eliminar Evento (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": "{{base_url}}/api/eventos/1",
+            "description": "Elimina un evento (solo admin)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💰 Apuestas",
+      "item": [
+        {
+          "name": "Mis Apuestas",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/mis-apuestas",
+            "description": "Lista apuestas del usuario autenticado"
+          }
+        },
+        {
+          "name": "Crear Apuesta",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_usuario}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/apuestas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"evento_id\": 1,\n    \"tipo_apuesta\": \"local\",\n    \"monto\": 10000,\n    \"cuota\": 2.5\n}"
+            },
+            "description": "Crea una nueva apuesta"
+          }
+        },
+        {
+          "name": "Ver Apuesta por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/apuestas/1",
+            "description": "Obtiene detalle de una apuesta"
+          }
+        },
+        {
+          "name": "Cobrar Apuesta",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_usuario}}" }
+            ],
+            "url": "{{base_url}}/api/apuestas/1/cobrar",
+            "description": "Cobra una apuesta ganada"
+          }
+        },
+        {
+          "name": "Todas las Apuestas (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": "{{base_url}}/api/admin/apuestas",
+            "description": "Lista todas las apuestas (solo admin)"
+          }
+        },
+        {
+          "name": "Cancelar Apuesta (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": "{{base_url}}/api/admin/apuestas/1/cancelar",
+            "description": "Cancela una apuesta (solo admin)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Pruebas de Permisos",
+      "item": [
+        {
+          "name": "ADMIN - Crear Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/eventos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"deporte\": \"Fútbol\",\n    \"equipo_local\": \"Real Madrid\",\n    \"equipo_visitante\": \"Barcelona\",\n    \"fecha\": \"2026-06-10 20:00:00\"\n}"
+            },
+            "description": "✅ Debe funcionar (HTTP 201)"
+          }
+        },
+        {
+          "name": "USUARIO - Crear Evento (debe fallar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_usuario}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/eventos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"deporte\": \"Fútbol\",\n    \"equipo_local\": \"Real Madrid\",\n    \"equipo_visitante\": \"Barcelona\",\n    \"fecha\": \"2026-06-10 20:00:00\"\n}"
+            },
+            "description": "❌ Debe fallar (HTTP 403)"
+          }
+        },
+        {
+          "name": "SIN TOKEN - Ver eventos (debe fallar)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/eventos",
+            "description": "❌ Debe fallar (HTTP 401)"
+          }
+        }
+      ]
+    }
+  ]
+}
