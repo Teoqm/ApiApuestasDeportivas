@@ -39,7 +39,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::post('apuestas/{id}/cobrar', [ApuestaController::class, 'cobrar']);
     
     // === RUTAS SOLO PARA ADMIN ===
-    Route::middleware(['role:admin'])->group(function () {
+    Route::middleware([\App\Http\Middleware\CheckRole::class . ':admin'])->group(function () {
         // Gestión de eventos
         Route::post('eventos', [EventosBaseController::class, 'store']);
         Route::put('eventos/{id}', [EventosBaseController::class, 'update']);
