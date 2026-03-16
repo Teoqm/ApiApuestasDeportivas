@@ -123,7 +123,7 @@ class ApuestasController extends BaseController
         DB::beginTransaction();
 
         try {
-            // 1. Crear la apuesta
+            // Crear la apuesta
             $apuesta = Apuesta::create([
                 'usuario_id' => $user->id,
                 'evento_id' => $request->evento_id,
@@ -134,7 +134,7 @@ class ApuestasController extends BaseController
                 'estado' => Apuesta::ESTADO_ACTIVA
             ]);
 
-            // 2. Descontar saldo del usuario
+            // Descontar saldo del usuario
             $user->saldo -= $request->monto;
             $user->save();
 
@@ -159,38 +159,8 @@ class ApuestasController extends BaseController
         }
     }
 
-    /**
-     * Mostrar una apuesta específica
-     */
-    public function show($id)
-    {
-        $user = Auth::user();
-        
-        $apuesta = Apuesta::with(['evento', 'usuario'])
-                    ->find($id);
 
-        if (!$apuesta) {
-            return response()->json([
-                'message' => "No se encontró la apuesta con id ($id)"
-            ], 404);
-        }
-
-        // Verificar que el usuario sea el dueño o admin
-        if ($user->id !== $apuesta->usuario_id && !$user->isAdmin()) {
-            return response()->json([
-                'message' => 'No autorizado para ver esta apuesta'
-            ], 403);
-        }
-
-        return response()->json([
-            'message' => 'Detalle de la apuesta',
-            'data' => $apuesta
-        ]);
-    }
-
-    /**
-     * Cobrar una apuesta ganada
-     */
+    //Cobrar una apuesta ganada
     public function cobrar($id)
     {
         $user = Auth::user();
@@ -252,99 +222,4 @@ class ApuestasController extends BaseController
         }
     }
 
-    /**
-     * Cancelar una apuesta (solo admin, o antes de que comience el evento)
-     */
-    public function cancelar($id)
-    {
-        $user = Auth::user();
-        
-        // Solo admin puede cancelar
-        if (!$user->isAdmin()) {
-            return response()->json([
-                'message' => 'No autorizado para cancelar apuestas'
-            ], 403);
-        }
-
-        $apuesta = Apuesta::find($id);
-
-        if (!$apuesta) {
-            return response()->json([
-                'message' => 'Apuesta no encontrada'
-            ], 404);
-        }
-
-        // Solo se pueden cancelar apuestas activas
-        if ($apuesta->estado !== Apuesta::ESTADO_ACTIVA) {
-            return response()->json([
-                'message' => 'Solo se pueden cancelar apuestas activas',
-                'estado_actual' => $apuesta->estado
-            ], 400);
-        }
-
-        DB::beginTransaction();
-
-        try {
-            // Devolver el dinero al usuario
-            $usuario = User::find($apuesta->usuario_id);
-            $usuario->saldo += $apuesta->monto;
-            $usuario->save();
-
-            // Cambiar estado de la apuesta
-            $apuesta->estado = 'cancelada';
-            $apuesta->save();
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Apuesta cancelada y saldo devuelto al usuario',
-                'data' => [
-                    'apuesta' => $apuesta,
-                    'usuario' => [
-                        'id' => $usuario->id,
-                        'saldo_restaurado' => $usuario->saldo
-                    ]
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            
-            return response()->json([
-                'message' => 'Error al cancelar la apuesta',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Estadísticas del usuario
-     */
-    public function estadisticas()
-    {
-        $user = Auth::user();
-
-        $stats = [
-            'total_apostado' => Apuesta::where('usuario_id', $user->id)
-                                ->sum('monto'),
-            'apuestas_ganadas' => Apuesta::where('usuario_id', $user->id)
-                                ->where('estado', Apuesta::ESTADO_GANADA)
-                                ->count(),
-            'apuestas_perdidas' => Apuesta::where('usuario_id', $user->id)
-                                ->where('estado', Apuesta::ESTADO_PERDIDA)
-                                ->count(),
-            'apuestas_activas' => Apuesta::where('usuario_id', $user->id)
-                                ->where('estado', Apuesta::ESTADO_ACTIVA)
-                                ->count(),
-            'total_ganancias' => Apuesta::where('usuario_id', $user->id)
-                                ->where('estado', Apuesta::ESTADO_COBRADA)
-                                ->sum('ganancia'),
-            'saldo_actual' => $user->saldo
-        ];
-
-        return response()->json([
-            'message' => 'Estadísticas del usuario',
-            'data' => $stats
-        ]);
-    }
 }
