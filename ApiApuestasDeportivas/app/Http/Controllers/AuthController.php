@@ -51,7 +51,6 @@ class AuthController extends Controller
                 });
 
             return response()->json([
-                'status' => 'success',
                 'message' => 'Credenciales correctas. Revisa tu email para el código OTP.',
                 'email' => $user->email
             ], 200);

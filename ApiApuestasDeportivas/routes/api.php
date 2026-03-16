@@ -9,6 +9,9 @@ use App\Http\Controllers\ApuestaController;
 // ===== RUTAS PÚBLICAS =====
 Route::post('login', [AuthController::class, 'login']);
 
+// Verificar OTP
+Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
+
 // Ruta de prueba
 Route::get('/test', function() {
     return response()->json(['mensaje' => 'API funciona correctamente']);
@@ -22,8 +25,7 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::get('me', [AuthController::class, 'me']);
     
-    // Verificar OTP
-    Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
+
     
     // === RUTAS DE EVENTOS para todos ===
     // Listar todos eventos
