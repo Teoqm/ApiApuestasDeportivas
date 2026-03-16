@@ -3,45 +3,49 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductoBaseController;
+use App\Http\Controllers\EventosBaseController; 
+use App\Http\Controllers\ApuestaController;   
 
-
-// Rutas públicas
+// ===== RUTAS PÚBLICAS =====
 Route::post('login', [AuthController::class, 'login']);
 
-// GET - Ruta de prueba para verificar que la API funciona
+// Ruta de prueba
 Route::get('/test', function() {
     return response()->json(['mensaje' => 'API funciona correctamente']);
 });
 
-
-//RUtas con seguriada
-Route::middleware(['auth:api'])->group(function () {
+// ===== RUTAS CON JWT =====
+Route::middleware(['jwt.auth'])->group(function () {
     
-
-    //  === Rutas accesibles para admin, usuario ===
-    Route::post('logout', [AuthController::class, 'logout']) ->middleware('role:admin,usuario');
+    // === RUTAS PARA CUALQUIER AUTENTICADO (admin y usuario) ===
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::get('me', [AuthController::class, 'me']);
     
-    Route::post('refresh', [AuthController::class, 'refresh'])->middleware('role:admin,usuario');
+    // Verificar OTP
+    Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
     
-    // Ruta para obtener información del usuario autenticado
-    Route::get('me', [AuthController::class, 'me'])->middleware('role:admin,usuario');
-
-    //ver eventos
-    Route::get('eventos', [EventosBaseController::class, 'show'])->middleware('role:admin,usuario');
-    //ver evento especifico
-    Route::get('eventos/{id}', [EventosBaseController::class, 'show'])->middleware('role:admin,usuario');
+    // === RUTAS DE EVENTOS para todos ===
+    // Listar todos eventos
+    Route::get('eventos', [EventosBaseController::class, 'index']);      
+    Route::get('eventos/{id}', [EventosBaseController::class, 'show']);  // Ver uno
     
+    // === RUTAS DE APUESTAS todos pueden apostar ===
+    Route::get('mis-apuestas', [ApuestaController::class, 'misApuestas']);
+    Route::post('apuestas', [ApuestaController::class, 'store']);
+    Route::get('apuestas/{id}', [ApuestaController::class, 'show']);
+    Route::post('apuestas/{id}/cobrar', [ApuestaController::class, 'cobrar']);
     
-    // ===== RUTAS De Admin =====
-    //  Rutas accesibles para admin
-    Route::middleware([\App\Http\Middleware\CheckRole::class . ':admin'])->group(function () {
-        //crea eventos
-        Route::post('eventos', [EventosBaseController::class, 'store']) ->middleware('role:admin');
-        //modificar eventos
-        Route::put('eventos/{id}', [EventosBaseController::class, 'update']) ->middleware('role:admin');
-        //eleminar evemtos
-        Route::delete('eventos/{id}', [EventosBaseController::class, 'destroy']) ->middleware('role:admin');
+    // === RUTAS SOLO PARA ADMIN ===
+    Route::middleware(['role:admin'])->group(function () {
+        // Gestión de eventos
+        Route::post('eventos', [EventosBaseController::class, 'store']);
+        Route::put('eventos/{id}', [EventosBaseController::class, 'update']);
+        Route::delete('eventos/{id}', [EventosBaseController::class, 'destroy']);
+        Route::post('eventos/{id}/simular', [EventosBaseController::class, 'simularResultado']);
+        
+        // Gestión de apuestas (admin)
+        Route::get('admin/apuestas', [ApuestaController::class, 'index']);
+        Route::post('admin/apuestas/{id}/cancelar', [ApuestaController::class, 'cancelar']);
     });
-    
-});middleware('auth:sanctum');
+});
