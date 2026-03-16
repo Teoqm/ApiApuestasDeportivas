@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventosBaseController; 
-use App\Http\Controllers\ApuestaController;   
+use App\Http\Controllers\ApuestasController;   
 
 // ===== RUTAS PÚBLICAS =====
 Route::post('login', [AuthController::class, 'login']);
@@ -33,10 +33,10 @@ Route::middleware(['jwt.auth'])->group(function () {
     Route::get('eventos/{id}', [EventosBaseController::class, 'show']);  // Ver uno
     
     // === RUTAS DE APUESTAS todos pueden apostar ===
-    Route::get('mis-apuestas', [ApuestaController::class, 'misApuestas']);
-    Route::post('apuestas', [ApuestaController::class, 'store']);
-    Route::get('apuestas/{id}', [ApuestaController::class, 'show']);
-    Route::post('apuestas/{id}/cobrar', [ApuestaController::class, 'cobrar']);
+    Route::get('mis-apuestas', [ApuestasController::class, 'misApuestas']);
+    Route::post('apuestas', [ApuestasController::class, 'store']);
+    Route::get('apuestas/{id}', [ApuestasController::class, 'show']);
+    Route::post('apuestas/{id}/cobrar', [ApuestasController::class, 'cobrar']);
     
     // === RUTAS SOLO PARA ADMIN ===
     Route::middleware([\App\Http\Middleware\CheckRole::class . ':admin'])->group(function () {
@@ -47,7 +47,7 @@ Route::middleware(['jwt.auth'])->group(function () {
         Route::post('eventos/{id}/simular', [EventosBaseController::class, 'simularResultado']);
         
         // Gestión de apuestas (admin)
-        Route::get('admin/apuestas', [ApuestaController::class, 'index']);
-        Route::post('admin/apuestas/{id}/cancelar', [ApuestaController::class, 'cancelar']);
+        Route::get('admin/apuestas', [ApuestasController::class, 'index']);
+        Route::post('admin/apuestas/{id}/cancelar', [ApuestasController::class, 'cancelar']);
     });
 });
